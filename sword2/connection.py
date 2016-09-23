@@ -26,6 +26,7 @@ from compatible_libs import etree
 # import httplib2
 import http_layer
 import urllib
+import requests
 
 class Connection(object):
     """
@@ -509,8 +510,9 @@ Loading in a locally held Service Document:
         self._t.start(request_type)
         if empty:
             # NULL body with explicit zero length.
-            headers['Content-Length'] = "0"
-            resp, content = self.h.request(target_iri, method, headers=headers)
+            #headers['Content-Length'] = "0"
+            #resp, content = self.h.request(target_iri, method, headers=headers)
+            resp = requests.request(method, target_iri, headers=headers, auth=(self.h.username, self.h.password))
             _, took_time = self._t.time_since_start(request_type)
             if self.history:
                 self.history.log(request_type + ": Empty request", 
@@ -521,7 +523,8 @@ Loading in a locally held Service Document:
                                  headers = headers,
                                  process_duration = took_time)  
         elif method == "DELETE":
-            resp, content = self.h.request(target_iri, method, headers=headers)
+            #resp, content = self.h.request(target_iri, method, headers=headers)
+            resp = requests.request(method, target_iri, headers=headers, auth=(self.h.username, self.h.password))
             _, took_time = self._t.time_since_start(request_type)
             if self.history:
                 self.history.log(request_type + ": DELETE request", 
@@ -536,9 +539,10 @@ Loading in a locally held Service Document:
             # Metadata-only resource creation
             headers['Content-Type'] = entry_content_type # "application/atom+xml;type=entry"
             data = str(metadata_entry)
-            headers['Content-Length'] = str(len(data))
+            #headers['Content-Length'] = str(len(data))
             
-            resp, content = self.h.request(target_iri, method, headers=headers, payload=data)
+            #resp, content = self.h.request(target_iri, method, headers=headers, payload=data)
+            resp = requests.request(method, target_iri, headers=headers, data=data, auth=(self.h.username, self.h.password))
             _, took_time = self._t.time_since_start(request_type)
             if self.history:
                 self.history.log(request_type + ": Metadata-only resource request", 
@@ -554,7 +558,7 @@ Loading in a locally held Service Document:
             my_headers = {"Content-MD5" : str(md5sum)}
             if packaging is not None:
                 my_headers['Packaging'] = str(packaging)
-            multicontent_type, payload_data = create_multipart_related([{'key':'atom',
+            '''multicontent_type, payload_data = create_multipart_related([{'key':'atom',
                                                                     'type':'application/atom+xml; charset="utf-8"',
                                                                     'data':str(metadata_entry),  # etree default is utf-8
                                                                     },
@@ -564,11 +568,16 @@ Loading in a locally held Service Document:
                                                                     'data':payload,  
                                                                     'headers':my_headers
                                                                     }
-                                                                   ])
+                                                                   ])'''
                                                                    
             headers['Content-Type'] = multicontent_type + '; type="application/atom+xml"'
-            headers['Content-Length'] = str(len(payload_data))    # must be str, not int type
-            resp, content = self.h.request(target_iri, method, headers=headers, payload=payload_data)
+            #headers['Content-Length'] = str(len(payload_data))    # must be str, not int type
+            payload_data = [
+                ('atom', ('', str(metadata_entry), 'application/atom+xml; charset="utf-8"')),
+                ('payload', (filename, payload, mimetype, my_headers)),
+            ]
+            #resp, content = self.h.request(target_iri, method, headers=headers, payload=payload_data)
+            resp = requests.request(method, target_iri, headers=headers, files=payload_data, auth=(self.h.username, self.h.password))
             _, took_time = self._t.time_since_start(request_type)
             if self.history:
                 self.history.log(request_type + ": Multipart resource request",
@@ -591,12 +600,13 @@ Loading in a locally held Service Document:
         elif filename and payload:
             headers['Content-Type'] = str(mimetype)
             headers['Content-MD5'] = str(md5sum)
-            headers['Content-Length'] = str(f_size)
+            #headers['Content-Length'] = str(f_size)
             headers['Content-Disposition'] = "attachment; filename=%s" % urllib.quote(filename)
             if packaging is not None:
                 headers['Packaging'] = str(packaging)
             
-            resp, content = self.h.request(target_iri, method, headers=headers, payload=payload)
+            #resp, content = self.h.request(target_iri, method, headers=headers, payload=payload)
+            resp = requests.request(method, target_iri, headers=headers, data=payload, auth=(self.h.username, self.h.password))
             _, took_time = self._t.time_since_start(request_type)
             if self.history:
                 self.history.log(request_type + ": simple resource request",
@@ -610,7 +620,8 @@ Loading in a locally held Service Document:
             conn_l.error("Parameters were not complete: requires a metadata_entry, or a payload/filename/packaging or both")
             raise Exception("Parameters were not complete: requires a metadata_entry, or a payload/filename/packaging or both")
         
-        if resp['status'] == 201:
+        import pdb; pdb.set_trace()
+        if resp.status_code == 201:
             #   Deposit receipt in content
             conn_l.info("Received a Resource Created (201) response.")
             # Check response headers for updated Location IRI
@@ -633,13 +644,13 @@ Loading in a locally held Service Document:
                 d.code = 201
                 d.location = location
                 return d
-        elif resp['status'] == 204:
+        elif resp.status_code == 204:
             #   Deposit receipt in content
             conn_l.info("Received a valid 'No Content' (204) response.")
             location = resp.get('location', None)
             # Check response headers for updated Locatio
             return Deposit_Receipt(response_headers = dict(resp), location=location, code=204)
-        elif resp['status'] == 200:
+        elif resp.status_code == 200:
             #   Deposit receipt in content
             conn_l.info("Received a valid (200) OK response.")
             content_type = resp.get('content-type')
