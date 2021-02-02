@@ -10,13 +10,13 @@ See Section 10. Deposit Receipt: http://sword-app.svn.sourceforge.net/viewvc/swo
 
 """
 
-from sword2.sword2_logging import logging
+from sword2_logging import logging
 d_l = logging.getLogger(__name__)
 
-from sword2.atom_objects import Category
+from atom_objects import Category
 
-from sword2.compatible_libs import etree
-from sword2.utils import NS, get_text
+from compatible_libs import etree
+from utils import NS, get_text
 
 class Deposit_Receipt(object):
     def __init__(self, xml_deposit_receipt=None, dom=None, response_headers={}, location=None, code=0):
@@ -131,7 +131,7 @@ Availible attributes:
                 # convert the string to a byte array so that it doesn't matter whether it has encoding declared or not
                 self.dom = etree.fromstring(bytes(xml_deposit_receipt))
                 self.parsed = True    
-            except Exception as e:
+            except Exception, e:
                 d_l.error("Was not able to parse the deposit receipt as XML.")
                 return
         elif dom != None:
@@ -190,7 +190,7 @@ Availible attributes:
     def handle_metadata(self):
         """Method that walks the `etree.SubElement`, assigning the information to the objects attributes."""
         for e in self.dom.getchildren():
-            for nmsp, prefix in NS.items():
+            for nmsp, prefix in NS.iteritems():
                 if str(e.tag).startswith(prefix % ""):
                     _, tagname = e.tag.rsplit("}", 1)
                     field = "%s_%s" % (nmsp, tagname)
@@ -200,7 +200,7 @@ Availible attributes:
                     elif field == "atom_content":
                         self.handle_content(e)
                     elif field == "atom_generator":
-                        for ak,av in e.attrib.items():
+                        for ak,av in e.attrib.iteritems():
                             if not e.text:
                                 e.text = ""
                             e.text += " %s:\"%s\"" % (ak, av)
@@ -218,7 +218,7 @@ Availible attributes:
                             self.summary = e.text
                         if field == "atom_category":
                             self.categories.append(Category(dom=e))
-                        if field in self.metadata:
+                        if self.metadata.has_key(field):
                             if isinstance(self.metadata[field], list):
                                 self.metadata[field].append(e.text)
                             else:
@@ -253,10 +253,10 @@ Availible attributes:
                     
             # Put all links into .links attribute, with all element attribs
             attribs = {}
-            for k,v in e.attrib.items():
+            for k,v in e.attrib.iteritems():
                 if k != "rel":
                     attribs[k] = v
-            if rel in self.links: 
+            if self.links.has_key(rel): 
                 self.links[rel].append(attribs)
             else:
                 self.links[rel] = [attribs]            
@@ -269,7 +269,7 @@ Availible attributes:
     def handle_content(self, e):
         """Method to intepret the <atom:content> elements."""
         # eg <content type="application/zip" src="http://swordapp.org/cont-IRI/43/my_deposit"/>
-        if "src" in e.attrib:
+        if e.attrib.has_key("src"):
             src = e.attrib['src']
             info = dict(e.attrib).copy()
             del info['src']
@@ -300,6 +300,6 @@ Availible attributes:
             _s.append("SWORD2 Package formats available: %s" % self.packaging)
         if self.alternate:
             _s.append("Alternate IRI: %s" % self.alternate)
-        for k, v in self.links.items():
+        for k, v in self.links.iteritems():
             _s.append("Link rel:'%s' -- %s" % (k, v))
         return "\n".join(_s)

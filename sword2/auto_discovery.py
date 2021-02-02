@@ -1,13 +1,14 @@
-from sword2.sword2_logging import logging
+from sword2_logging import logging
 ad_l = logging.getLogger(__name__)
 
-from sword2 import http_layer
-from html.parser import HTMLParser
+# FIXME: sgmllib is deprecated, and removed from Python 3.  If moving to
+# Python 3 will need to look at http.parser instead or etree.HTMLParser
+import sgmllib, http_layer
 
-class AutoDiscovery(HTMLParser):
+class AutoDiscovery(sgmllib.SGMLParser):
 
     def __init__(self, url=None, http_impl=None):
-        HTMLParser.__init__(self)
+        sgmllib.SGMLParser.__init__(self)
         
         self.url = url
         self.service_document = None
