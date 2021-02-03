@@ -4,7 +4,7 @@ from sword2.compatible_libs import etree
 
 PACKAGE = "tests/spec/example.zip"
 PACKAGE_MIME = "application/zip"
-SSS_URL = "http://localhost:8081/sd-uri"
+SSS_URL = "http://localhost:8080/sd-uri"
 SSS_UN = "sword"
 SSS_PW = "sword"
 SSS_OBO = "obo"
@@ -42,7 +42,7 @@ class TestConnection(TestController):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href, 
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -61,7 +61,7 @@ class TestConnection(TestController):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW, on_behalf_of=SSS_OBO)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href, 
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -78,13 +78,12 @@ class TestConnection(TestController):
         assert receipt.dom is None or receipt.parsed == True
         assert receipt.dom is None or receipt.valid == True
         
-    """
     def test_05_basic_create_resource_with_multipart(self):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
         e = Entry(title="Foo", id="asidjasidj", dcterms_abstract="abstract", dcterms_title="my title")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         metadata_entry = e,
                         payload=pkg, 
@@ -105,7 +104,7 @@ class TestConnection(TestController):
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
         e = Entry(title="Foo", id="asidjasidj", dcterms_abstract="abstract", dcterms_title="my title")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         metadata_entry = e,
                         payload=pkg, 
@@ -122,8 +121,7 @@ class TestConnection(TestController):
         # receipt back from the server (which we might not legitimately get)
         assert receipt.dom is None or receipt.parsed == True
         assert receipt.dom is None or receipt.valid == True
-    """
-
+    
     def test_07_basic_create_resource_with_entry(self):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
         conn.get_service_document()
@@ -162,7 +160,7 @@ class TestConnection(TestController):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href, 
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -182,7 +180,7 @@ class TestConnection(TestController):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW, on_behalf_of=SSS_OBO)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href, 
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -200,55 +198,55 @@ class TestConnection(TestController):
         assert new_receipt.parsed == True
         assert new_receipt.valid == True
     
-    # def test_11_basic_retrieve_content_cont_iri(self):
-    #     conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
-    #     conn.get_service_document()
-    #     col = conn.sd.workspaces[0][1][0]
-    #     with open(PACKAGE, 'rb') as pkg:
-    #         receipt = conn.create(col_iri = col.href, 
-    #                     payload=pkg, 
-    #                     mimetype=PACKAGE_MIME, 
-    #                     filename="example.zip",
-    #                     packaging='http://purl.org/net/sword/package/SimpleZip')
-    #     # ensure that we have a receipt (the server may not give us one
-    #     # by default)
-    #     receipt = conn.get_deposit_receipt(receipt.location)
+    def test_11_basic_retrieve_content_cont_iri(self):
+        conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
+        conn.get_service_document()
+        col = conn.sd.workspaces[0][1][0]
+        with open(PACKAGE) as pkg:
+            receipt = conn.create(col_iri = col.href, 
+                        payload=pkg, 
+                        mimetype=PACKAGE_MIME, 
+                        filename="example.zip",
+                        packaging='http://purl.org/net/sword/package/SimpleZip')
+        # ensure that we have a receipt (the server may not give us one
+        # by default)
+        receipt = conn.get_deposit_receipt(receipt.location)
         
-    #     # we're going to work with the cont_iri
-    #     assert receipt.cont_iri is not None
+        # we're going to work with the cont_iri
+        assert receipt.cont_iri is not None
         
-    #     resource = conn.get_resource(content_iri=receipt.cont_iri)
+        resource = conn.get_resource(content_iri=receipt.cont_iri)
         
-    #     assert resource.code == 200
-    #     assert resource.content is not None
+        assert resource.code == 200
+        assert resource.content is not None
         
-    # def test_12_basic_retrieve_content_em_iri(self):
-    #     conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
-    #     conn.get_service_document()
-    #     col = conn.sd.workspaces[0][1][0]
-    #     with open(PACKAGE, 'rb') as pkg:
-    #         receipt = conn.create(col_iri = col.href, 
-    #                     payload=pkg, 
-    #                     mimetype=PACKAGE_MIME, 
-    #                     filename="example.zip",
-    #                     packaging='http://purl.org/net/sword/package/SimpleZip')
-    #     # ensure that we have a receipt (the server may not give us one
-    #     # by default)
-    #     receipt = conn.get_deposit_receipt(receipt.location)
-    #     # import pdb; pdb.set_trace()
-    #     # we're going to work with the edit_media iri
-    #     assert receipt.edit_media is not None
+    def test_12_basic_retrieve_content_em_iri(self):
+        conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
+        conn.get_service_document()
+        col = conn.sd.workspaces[0][1][0]
+        with open(PACKAGE) as pkg:
+            receipt = conn.create(col_iri = col.href, 
+                        payload=pkg, 
+                        mimetype=PACKAGE_MIME, 
+                        filename="example.zip",
+                        packaging='http://purl.org/net/sword/package/SimpleZip')
+        # ensure that we have a receipt (the server may not give us one
+        # by default)
+        receipt = conn.get_deposit_receipt(receipt.location)
         
-    #     resource = conn.get_resource(content_iri=receipt.edit_media)
+        # we're going to work with the edit_media iri
+        assert receipt.edit_media is not None
         
-    #     assert resource.code == 200
-    #     assert resource.content is not None
+        resource = conn.get_resource(content_iri=receipt.edit_media)
+        
+        assert resource.code == 200
+        assert resource.content is not None
  
     def test_13_advanced_retrieve_content_em_iri(self):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href, 
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -272,7 +270,7 @@ class TestConnection(TestController):
                             honour_receipts=False, error_response_raises_exceptions=False)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href, 
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -293,7 +291,7 @@ class TestConnection(TestController):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href, 
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -319,7 +317,7 @@ class TestConnection(TestController):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href, 
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -331,7 +329,7 @@ class TestConnection(TestController):
         receipt = conn.get_deposit_receipt(receipt.location)
         
         # now do the replace
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             new_receipt = conn.update(dr = receipt,
                             payload=pkg,
                             mimetype=PACKAGE_MIME,
@@ -345,7 +343,7 @@ class TestConnection(TestController):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW, on_behalf_of=SSS_OBO)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href, 
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -357,7 +355,7 @@ class TestConnection(TestController):
         receipt = conn.get_deposit_receipt(receipt.location)
         
         # now do the replace
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             new_receipt = conn.update(dr = receipt,
                             payload=pkg,
                             mimetype=PACKAGE_MIME,
@@ -411,13 +409,13 @@ class TestConnection(TestController):
         if new_receipt.code == 200:
             assert new_receipt.parsed == True
             assert new_receipt.valid == True
-    """
+
     def test_20_basic_replace_with_multipart(self):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
         e = Entry(title="Multipart deposit", id="asidjasidj", dcterms_abstract="abstract", dcterms_identifier="http://whatever/")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         metadata_entry = e,
                         payload=pkg, 
@@ -431,7 +429,7 @@ class TestConnection(TestController):
         
         # now do the replace
         ne = Entry(title="A multipart update", id="asidjasidj", dcterms_abstract="new abstract", dcterms_identifier="http://elsewhere/")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             new_receipt = conn.update(dr = receipt,
                             metadata_entry = ne,
                             payload=pkg,
@@ -451,7 +449,7 @@ class TestConnection(TestController):
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
         e = Entry(title="Multipart deposit", id="asidjasidj", dcterms_abstract="abstract", dcterms_identifier="http://whatever/")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         metadata_entry = e,
                         payload=pkg, 
@@ -465,7 +463,7 @@ class TestConnection(TestController):
         
         # now do the replace
         ne = Entry(title="A multipart update", id="asidjasidj", dcterms_abstract="new abstract", dcterms_identifier="http://elsewhere/")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             new_receipt = conn.update(dr = receipt,
                             metadata_entry = ne,
                             payload=pkg,
@@ -480,14 +478,13 @@ class TestConnection(TestController):
         if new_receipt.code == 200:
             assert new_receipt.parsed == True
             assert new_receipt.valid == True
-    """
-
+    
     def test_22_delete_content(self):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW, on_behalf_of=SSS_OBO)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
         # e = Entry(title="Multipart deposit", id="asidjasidj", dcterms_abstract="abstract", dcterms_identifier="http://whatever/")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         # metadata_entry = e,
                         payload=pkg, 
@@ -510,7 +507,7 @@ class TestConnection(TestController):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href, 
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -519,7 +516,7 @@ class TestConnection(TestController):
                         in_progress=True)
         receipt = conn.get_deposit_receipt(receipt.location)
         
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             new_receipt = conn.add_file_to_resource(receipt.edit_media, pkg, "addition.zip", mimetype=PACKAGE_MIME)
         
         assert new_receipt.code >= 200 and new_receipt.code < 400
@@ -530,7 +527,7 @@ class TestConnection(TestController):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW, on_behalf_of=SSS_OBO)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href, 
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -539,7 +536,7 @@ class TestConnection(TestController):
                         in_progress=True)
         receipt = conn.get_deposit_receipt(receipt.location)
         
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             new_receipt = conn.add_file_to_resource(receipt.edit_media, pkg, "addition.zip", 
                                                     mimetype=PACKAGE_MIME,
                                                     metadata_relevant=True)
@@ -552,7 +549,7 @@ class TestConnection(TestController):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href, 
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -561,7 +558,7 @@ class TestConnection(TestController):
                         in_progress=True)
         receipt = conn.get_deposit_receipt(receipt.location)
         
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             new_receipt = conn.add_file_to_resource(receipt.edit_media, pkg, "addition.zip", 
                                                     mimetype=PACKAGE_MIME,
                                                     packaging="http://purl.org/net/sword/package/SimpleZip")
@@ -574,7 +571,7 @@ class TestConnection(TestController):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW, on_behalf_of=SSS_OBO)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href, 
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -583,7 +580,7 @@ class TestConnection(TestController):
                         in_progress=True)
         receipt = conn.get_deposit_receipt(receipt.location)
         
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             new_receipt = conn.add_file_to_resource(receipt.edit_media, pkg, "addition.zip", 
                                                     mimetype=PACKAGE_MIME,
                                                     packaging="http://purl.org/net/sword/package/SimpleZip",
@@ -598,7 +595,7 @@ class TestConnection(TestController):
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
         e = Entry(title="Multipart deposit", id="asidjasidj", dcterms_abstract="abstract", dcterms_identifier="http://whatever/")
-        #with open(PACKAGE, 'rb') as pkg:
+        #with open(PACKAGE) as pkg:
         receipt = conn.create(col_iri = col.href,
                     metadata_entry = e,
                     #payload=pkg, 
@@ -622,7 +619,7 @@ class TestConnection(TestController):
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
         e = Entry(title="Multipart deposit", id="asidjasidj", dcterms_abstract="abstract", dcterms_identifier="http://whatever/")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         metadata_entry = e,
                         #payload=pkg, 
@@ -641,13 +638,12 @@ class TestConnection(TestController):
         
         assert new_receipt.code == 200
 
-    """
     def test_29_basic_add_multipart(self):
         conn = Connection(SSS_URL, user_name=SSS_UN, user_pass=SSS_PW)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
         e = Entry(title="Multipart deposit", id="asidjasidj", dcterms_abstract="abstract", dcterms_identifier="http://whatever/")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         metadata_entry = e,
                         payload=pkg, 
@@ -661,7 +657,7 @@ class TestConnection(TestController):
         
         ne = Entry(title="Multipart deposit", id="asidjasidj", dcterms_identifier="http://another/",
                     dcterms_creator="Me!", dcterms_rights="CC0")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             new_receipt = conn.append(dr=receipt,
                                         metadata_entry=ne,
                                         payload=pkg, 
@@ -676,7 +672,7 @@ class TestConnection(TestController):
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
         e = Entry(title="Multipart deposit", id="asidjasidj", dcterms_abstract="abstract", dcterms_identifier="http://whatever/")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         metadata_entry = e,
                         payload=pkg, 
@@ -690,7 +686,7 @@ class TestConnection(TestController):
         
         ne = Entry(title="Multipart deposit", id="asidjasidj", dcterms_identifier="http://another/",
                     dcterms_creator="Me!", dcterms_rights="CC0")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             new_receipt = conn.append(dr=receipt,
                                         metadata_entry=ne,
                                         payload=pkg, 
@@ -701,8 +697,7 @@ class TestConnection(TestController):
                                         metadata_relevant=True)
             
         assert new_receipt.code >= 200 and new_receipt.code < 400
-    """
-    
+
     # FIXME: this test just does not work, for no discernable reason.  The 
     # final assert of a 404 fails, and the debug output of the client says
     # that the server responded with a 200.  Nonetheless, the server logs show
@@ -716,7 +711,7 @@ class TestConnection(TestController):
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
         e = Entry(title="Multipart deposit", id="asidjasidj", dcterms_abstract="abstract", dcterms_identifier="http://whatever/")
-        #with open(PACKAGE, 'rb') as pkg:
+        #with open(PACKAGE) as pkg:
         receipt = conn.create(col_iri = col.href,
                     metadata_entry = e,
                     #payload=pkg, 
@@ -747,7 +742,7 @@ class TestConnection(TestController):
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
         e = Entry(title="Multipart deposit", id="asidjasidj", dcterms_abstract="abstract", dcterms_identifier="http://whatever/")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         # metadata_entry = e,
                         payload=pkg, 
@@ -772,7 +767,7 @@ class TestConnection(TestController):
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
         e = Entry(title="Multipart deposit", id="asidjasidj", dcterms_abstract="abstract", dcterms_identifier="http://whatever/")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         # metadata_entry = e,
                         payload=pkg, 
@@ -797,7 +792,7 @@ class TestConnection(TestController):
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
         e = Entry(title="Foo", id="asidjasidj", dcterms_abstract="abstract", dcterms_title="my title")
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         # metadata_entry = e,
                         payload=pkg, 
@@ -821,7 +816,7 @@ class TestConnection(TestController):
                             error_response_raises_exceptions=False)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -840,7 +835,7 @@ class TestConnection(TestController):
                             error_response_raises_exceptions=False)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
@@ -858,7 +853,7 @@ class TestConnection(TestController):
                             error_response_raises_exceptions=False)
         conn.get_service_document()
         col = conn.sd.workspaces[0][1][0]
-        with open(PACKAGE, 'rb') as pkg:
+        with open(PACKAGE) as pkg:
             receipt = conn.create(col_iri = col.href,
                         payload=pkg, 
                         mimetype=PACKAGE_MIME, 
