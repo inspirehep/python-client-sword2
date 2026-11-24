@@ -5,15 +5,11 @@
 `sword2` logging
 """
 
-import imp
 import os
 import logging
 import logging.config
 
-try:
-    _, sword2_path, _ = imp.find_module('sword2')
-except ImportError:
-    sword2_path = ""
+sword2_path = os.path.dirname(os.path.abspath(__file__))
 SWORD2_LOGGING_CONFIG = os.path.join(sword2_path, 'data', 'sword2_logging.conf')  # default
 
 BASIC_CONFIG = """[loggers]
