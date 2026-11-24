@@ -1,0 +1,38 @@
+name: Test Python 3
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12', '3.13', '3.14','3.15']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . pytest lxml
+
+      - name: Show python dependencies
+        run: |
+          python --version
+          pip freeze
+
+      # Only tests/functional run in CI; the other suites need a live
+      # SWORD2 server on localhost:8081. See tests/README.
+      - name: Run tests
+        run: |
+          pytest tests/functional
